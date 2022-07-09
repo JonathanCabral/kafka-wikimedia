@@ -24,6 +24,7 @@ public class WikimediaChangeHandler implements EventHandler {
 
     @Override
     public void onClosed() {
+        //Close also does the flush
         producer.close();
     }
 
