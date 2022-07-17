@@ -1,3 +1,4 @@
 rootProject.name = 'kafka-wikimedia'
 include 'producer'
+include 'consumer'
 
