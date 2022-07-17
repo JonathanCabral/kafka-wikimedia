@@ -8,6 +8,7 @@ import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.ProducerConfig;
+import org.apache.kafka.common.record.CompressionType;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,11 +30,16 @@ public class WikimediaChangesProducer {
          * SINCE KAFKA 3.0, THIS PROPERTIES ARE SET BY DEFAULT, AKA SAFE KAFKA PRODUCER
          * So it's not needed to be set
          */
-//        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all");
-//        properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true");
-//        properties.setProperty(ProducerConfig.RETRIES_CONFIG, "2147483647"); //Integer.MAX_VALUE
-//        properties.setProperty(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "120000"); //2 minutes
-//        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");
+//        properties.setProperty(ProducerConfig.ACKS_CONFIG, "all"); Ensure that the data is properly replicated, before an ack is received
+//        properties.setProperty(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG, "true"); Duplicates are no introduced due to network retries
+//        properties.setProperty(ProducerConfig.RETRIES_CONFIG, "2147483647"); //Integer.MAX_VALUE Number of times the producer will try retry due the time of timeout
+//        properties.setProperty(ProducerConfig.DELIVERY_TIMEOUT_MS_CONFIG, "120000"); Fail after retrying for 2 minutes
+//        properties.setProperty(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION, "5");  Ensure that maximum performance while keeping messages ordering
+
+        //properties for a high throughput producer, configuring compression, linger.ms and batch.size
+        properties.setProperty(ProducerConfig.COMPRESSION_TYPE_CONFIG, CompressionType.SNAPPY.toString());
+        properties.setProperty(ProducerConfig.LINGER_MS_CONFIG, "20"); //20ms
+        properties.setProperty(ProducerConfig.BATCH_SIZE_CONFIG, Integer.toString(32 * 1024));
 
         KafkaProducer<String, String> producer = new KafkaProducer<String, String>(properties);
 
